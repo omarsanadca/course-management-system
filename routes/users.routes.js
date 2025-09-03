@@ -3,29 +3,27 @@ import express from "express";
 import {
   getAllUsers,
   getUser,
-  addUser,
   updateUser,
   deleteUser,
-  register,
-  login,
+  getEnrolledCourses,
+  enrollCourse,
 } from "../controllers/users.controller.js";
 
-import isAuthenticated from "../middlewares/is-authenticated.js";
+import isAdmin from "../middlewares/is-admin.js";
 
 const router = express.Router();
 
-router.get("/", getAllUsers);
+router.get("/", isAdmin, getAllUsers);
 
-router.get("/me", isAuthenticated, getUser);
+router.get("/me", getUser);
+router.get("/:id", isAdmin, getUser);
 
-// router.post("/", addUser);
+router.patch("/me", updateUser);
 
-router.post("/register", register);
+router.delete("/me", deleteUser);
 
-router.post("/login", login);
+router.get("/enrolled-courses", getEnrolledCourses);
 
-router.patch("/me", isAuthenticated, updateUser);
-
-router.delete("/:id", deleteUser);
+router.post("/enroll", enrollCourse);
 
 export default router;

@@ -7,15 +7,19 @@ const isAuthenticated = (req, res, next) => {
     if (!token) {
       const err = new Error("UnAuthorized!");
       err.status = 401;
-      next(err);
+      return next(err);
     }
 
-    /* Sync */
-    const payload = jwt.verify(token, "my-secret");
+    jwt.verify(token, "my-secret", (err, payload) => {
+      if (err) {
+        return next(err);
+      }
 
-    req.userId = payload.userId;
+      req.userId = payload.userId;
+      req.role = payload.role;
 
-    next();
+      next();
+    });
   } catch (err) {
     next(err);
   }

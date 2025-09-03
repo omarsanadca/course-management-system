@@ -1,7 +1,5 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-
 import { User } from "../models/user.model.js";
+import { Course } from "../models/course.model.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -14,29 +12,14 @@ export const getAllUsers = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findByPk(req.userId);
-    
+    const user = await User.findByPk(req.params.id || req.userId);
+
     if (!user) {
       return res.status(404).json({ message: "user not found!" });
     }
     res.json({ message: "get user data", user });
   } catch (err) {
     res.status(500).json({ message: "Server Error!" });
-  }
-};
-
-export const addUser = async (req, res) => {
-  try {
-    const userData = req.body;
-
-    await User.create(userData, { fields: ["name", "email"] });
-    res.status(201).json({ message: "added user!" });
-  } catch (err) {
-    res.status(500).json({
-      message: "Server Error!",
-      errMessage: err.message,
-      errors: err.errors,
-    });
   }
 };
 
@@ -58,95 +41,69 @@ export const updateUser = async (req, res, next) => {
   }
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res, next) => {
   try {
-    const user = await User.findByPk(req.params.id);
+    const user = await User.findByPk(req.userId);
 
     if (!user) {
-      return res.status(404).json({ message: "user not found!" });
+      const err = new Error("user not found!");
+      err.status = 400;
+      throw err;
     }
 
     await user.destroy();
 
     res.json({ message: "deleted user!" });
   } catch (err) {
-    res.status(500).json({
-      message: "Server Error!",
-      errMessage: err.message,
-      errors: err.errors,
-    });
+    next(err);
   }
 };
 
-export const register = async (req, res, next) => {
+export const getEnrolledCourses = async (req, res, next) => {
   try {
-    const { name, email, password, confirmPassword } = req.body;
+    const userId = req.userId;
 
-    const findUser = await User.findOne({
-      where: {
-        email,
-      },
-    });
+    const user = await User.findByPk(userId);
 
-    if (findUser) {
-      const err = new Error("This email is already used!");
+    if (!user) {
+      const err = new Error("User was deleted!");
       err.status = 400;
       throw err;
     }
 
-    if (password !== confirmPassword) {
-      const err = new Error("Passwords don't match!");
-      err.status = 400;
-      throw err;
-    }
+    const courses = await user.getCourses();
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({ name, email, password: hashedPassword });
-
-    res.status(201).json({
-      message: "User created!",
-      user: {
-        name: user.name,
-        email: user.email,
-      },
-    });
+    res.json({ message: "Fetched your courses", courses });
   } catch (err) {
     next(err);
   }
 };
 
-export const login = async (req, res, next) => {
+export const enrollCourse = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const userId = req.userId;
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findByPk(userId);
 
     if (!user) {
-      const err = new Error("Wrong credentials");
+      const err = new Error("User was deleted!");
       err.status = 400;
       throw err;
     }
 
-    const doMatch = await bcrypt.compare(password, user.password);
+    const courseId = req.body.courseId;
 
-    if (!doMatch) {
-      const err = new Error("Wrong credentials!!!!!!!!!!!");
-      err.status = 400;
+    const course = await Course.findByPk(courseId);
+
+    if (!course) {
+      const err = new Error("Course NOT FOUND");
+      err.status = 404;
       throw err;
     }
 
-    const payload = {
-      userId: user.id,
-      userEmail: user.email,
-    };
+    const result = await user.addCourse(course);
 
-    const token = jwt.sign(payload, "my-secret", { expiresIn: "24h" });
-
-    res.json({
-      message: "user logged in successfully!",
-      token,
-    });
+    res.json({ message: "User enrolled in the course!", course });
   } catch (err) {
     next(err);
   }

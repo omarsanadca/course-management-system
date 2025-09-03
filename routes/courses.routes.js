@@ -8,21 +8,24 @@ import {
   deleteCourse,
 } from "../controllers/courses.controller.js";
 
+import isAuthenticated from "../middlewares/is-authenticated.js";
+import isAdmin from "../middlewares/is-admin.js";
+
 const router = express.Router();
 
-router.use((req, res, next) => {
-  console.log("Welcome to our courses endpoints!");
-  next();
-})
-
+/* No protection */
 router.get("/", getAllCourses);
 
+/* No protection */
 router.get("/:id", getCourse);
 
-router.post("/", addCourse);
+/* Needs protection, (ADMIN) */
+router.post("/", isAuthenticated, isAdmin, addCourse);
 
-router.patch("/:id", updateCourse);
+/* Needs protection, (ADMIN) */
+router.patch("/:id", isAuthenticated, isAdmin, updateCourse);
 
-router.delete("/:id", deleteCourse);
+/* Needs protection, (ADMIN) */
+router.delete("/:id", isAuthenticated, isAdmin, deleteCourse);
 
 export default router;

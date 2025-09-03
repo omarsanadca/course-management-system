@@ -29,9 +29,11 @@ export const addCourse = async (req, res, next) => {
   try {
     const courseData = req.body;
 
-    await Course.create(courseData, { field: ["title", "price"] });
+    const course = await Course.create(courseData, {
+      field: ["title", "price"],
+    });
 
-    res.status(201).json({ message: "added course!" });
+    res.status(201).json({ message: "added course!", course });
   } catch (err) {
     next(err);
   }

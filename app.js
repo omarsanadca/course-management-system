@@ -3,13 +3,19 @@ import morgan from "morgan";
 
 import sequelize from "./utils/db.js";
 
+/* model */
 import { Course } from "./models/course.model.js";
 import { Profile } from "./models/profile.model.js";
 import { User } from "./models/user.model.js";
 
+/* routes */
 import usersRoutes from "./routes/users.routes.js";
 import coursesRoutes from "./routes/courses.routes.js";
 import profilesRoutes from "./routes/profile.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+
+/* middlewares */
+import isAuthenticated from "./middlewares/is-authenticated.js";
 
 const app = express();
 
@@ -17,19 +23,30 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
-// app.use((req, res, next) => {
-//   console.log(`${req.method} ${req.url}`);
-//   next();
-// });
-
 app.get("/", async (req, res) => {
   res.json({ message: "SERVER OK!", headers: req.headers });
 });
 
+/*
+
+app.use("/a/data", (req, res) => {
+  res.send("/a/data");
+});
+
+app.use("/a", (req, res) => {
+  res.send("/a");
+});
+
+== 1. req run from line 1 to ...
+== 2. use() // match the prefix
+== 3. we must sort (from most specific to the general)
+*/
+
 /* app routes */
-app.use("/api/users/", usersRoutes);
+app.use("/api/users/", isAuthenticated, usersRoutes);
 app.use("/api/courses/", coursesRoutes);
-app.use("/api/profiles/", profilesRoutes);
+app.use("/api/profiles/", isAuthenticated, profilesRoutes);
+app.use("/api/auth/", authRoutes);
 
 app.use((err, req, res, next) => {
   const statusCode = err.status || 500;

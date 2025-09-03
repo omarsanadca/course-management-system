@@ -1,0 +1,5 @@
+- User manage his courses
+- separate auth logic
+- authorization, admin logic (manage courses) [add role property]
+- 401, 403 status code 
+- make separate admin route

@@ -28,6 +28,10 @@ export const User = sequelize.define("User", {
       isEmail: true,
     }
   },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: "student",
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false

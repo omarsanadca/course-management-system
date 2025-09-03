@@ -1,45 +1,41 @@
 import { User } from "../models/user.model.js";
 
-export const getProfile = async (req, res) => {
+export const getProfile = async (req, res, next) => {
   try {
-    const user = await User.findByPk(req.params.userId);
+    const user = await User.findByPk(req.userId);
     const profileData = await user.getProfile();
     res.json({ message: "get user profile data", profileData });
   } catch (err) {
-    res.status(500).json({ message: "Server Error!" });
+    next(err);
   }
 };
 
-export const fillProfile = async (req, res) => {
+export const fillProfile = async (req, res, next) => {
   try {
     const profileData = req.body;
 
-    const user = await User.findByPk(req.params.userId);
+    const user = await User.findByPk(req.userId);
 
     await user.createProfile({ age: profileData.age });
 
     res.status(201).json({ message: "Profile DONE!" });
   } catch (err) {
-    res.status(500).json({ message: "Server Error!" });
+    next(err);
   }
 };
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res, next) => {
   try {
     const profileData = req.body;
 
-    const user = await User.findByPk(req.params.userId);
+    const user = await User.findByPk(req.userId);
 
     const profile = await user.getProfile();
 
-    await profile.update(profileData, { fields: ["age"] });
+    const newProfile = await profile.update(profileData, { fields: ["age"] });
 
-    res.json({ message: "user profile updated!" });
+    res.json({ message: "user profile updated!", newProfile });
   } catch (err) {
-    res.status(500).json({
-      message: "Server Error!",
-      errMessage: err.message,
-      errors: err.errors,
-    });
+    next(err);
   }
 };
