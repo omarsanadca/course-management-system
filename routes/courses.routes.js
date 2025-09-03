@@ -10,6 +10,11 @@ import {
 
 const router = express.Router();
 
+router.use((req, res, next) => {
+  console.log("Welcome to our courses endpoints!");
+  next();
+})
+
 router.get("/", getAllCourses);
 
 router.get("/:id", getCourse);
