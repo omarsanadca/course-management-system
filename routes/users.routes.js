@@ -6,17 +6,25 @@ import {
   addUser,
   updateUser,
   deleteUser,
+  register,
+  login,
 } from "../controllers/users.controller.js";
+
+import isAuthenticated from "../middlewares/is-authenticated.js";
 
 const router = express.Router();
 
 router.get("/", getAllUsers);
 
-router.get("/:id", getUser);
+router.get("/me", isAuthenticated, getUser);
 
-router.post("/", addUser);
+// router.post("/", addUser);
 
-router.patch("/:id", updateUser);
+router.post("/register", register);
+
+router.post("/login", login);
+
+router.patch("/me", isAuthenticated, updateUser);
 
 router.delete("/:id", deleteUser);
 
