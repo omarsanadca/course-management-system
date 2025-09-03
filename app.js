@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 
+/* db configuration */
 import sequelize from "./utils/db.js";
 
 /* model */
@@ -13,9 +14,12 @@ import usersRoutes from "./routes/users.routes.js";
 import coursesRoutes from "./routes/courses.routes.js";
 import profilesRoutes from "./routes/profile.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 /* middlewares */
 import isAuthenticated from "./middlewares/is-authenticated.js";
+import isAdmin from "./middlewares/is-admin.js";
+import errorMiddleware from "./middlewares/error.js";
 
 const app = express();
 
@@ -28,7 +32,6 @@ app.get("/", async (req, res) => {
 });
 
 /*
-
 app.use("/a/data", (req, res) => {
   res.send("/a/data");
 });
@@ -39,7 +42,7 @@ app.use("/a", (req, res) => {
 
 == 1. req run from line 1 to ...
 == 2. use() // match the prefix
-== 3. we must sort (from most specific to the general)
+== 3. we must sort (from most specific to the general) [all methods]
 */
 
 /* app routes */
@@ -47,18 +50,9 @@ app.use("/api/users/", isAuthenticated, usersRoutes);
 app.use("/api/courses/", coursesRoutes);
 app.use("/api/profiles/", isAuthenticated, profilesRoutes);
 app.use("/api/auth/", authRoutes);
+app.use("/api/admin/", isAuthenticated, isAdmin, adminRoutes);
 
-app.use((err, req, res, next) => {
-  const statusCode = err.status || 500;
-  const errorMessage = err.message || "Server Error!!";
-  let note = undefined;
-  if (statusCode === 500) {
-    note = "Our server is not working ok these days, we will fix it in 7 days";
-  }
-  res
-    .status(statusCode)
-    .json({ message: errorMessage, errors: err.errors || [], note });
-});
+app.use(errorMiddleware);
 
 /* Relationships */
 User.hasOne(Profile);

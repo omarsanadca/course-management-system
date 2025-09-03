@@ -13,10 +13,7 @@ import isAdmin from "../middlewares/is-admin.js";
 
 const router = express.Router();
 
-router.get("/", isAdmin, getAllUsers);
-
 router.get("/me", getUser);
-router.get("/:id", isAdmin, getUser);
 
 router.patch("/me", updateUser);
 
