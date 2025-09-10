@@ -19,16 +19,6 @@ export const Course = sequelize.define("Course", {
   discount: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
-    validate: {
-      min: {
-        args: [0],
-        msg: "discount must >= 0",
-      },
-      max: {
-        args: [100],
-        msg: "discount must be <= 100",
-      },
-    },
   },
   newPrice: {
     type: DataTypes.VIRTUAL,

@@ -3,3 +3,6 @@
 - authorization, admin logic (manage courses) [add role property]
 - 401, 403 status code 
 - make separate admin route
+
+
+/api/users/enroll (courseId)

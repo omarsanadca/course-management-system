@@ -18,15 +18,12 @@ export const User = sequelize.define("User", {
       const rawData = this.getDataValue("name");
       if (!rawData) return null;
       return "Mr." + rawData;
-    }
+    },
   },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
-    validate: {
-      isEmail: true,
-    }
   },
   role: {
     type: DataTypes.STRING,
@@ -34,7 +31,7 @@ export const User = sequelize.define("User", {
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   fullData: {
     type: DataTypes.VIRTUAL,
@@ -45,7 +42,7 @@ export const User = sequelize.define("User", {
       return "Full Data -> " + name + " | " + email;
     },
     set() {
-      throw new Error("Don't set the data `fullData`")
-    }
-  }
+      throw new Error("Don't set the data `fullData`");
+    },
+  },
 });

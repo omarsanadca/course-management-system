@@ -1,3 +1,4 @@
+import { matchedData, validationResult } from "express-validator";
 import { Course } from "../models/course.model.js";
 
 export const getAllCourses = async (req, res, next) => {
@@ -11,6 +12,15 @@ export const getAllCourses = async (req, res, next) => {
 
 export const getCourse = async (req, res, next) => {
   try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      const err = new Error("Failed to fetch course data!");
+      err.status = 400;
+      err.errors = errors.array();
+      throw err;
+    }
+
     const course = await Course.findByPk(req.params.id);
 
     if (!course) {
@@ -27,11 +37,18 @@ export const getCourse = async (req, res, next) => {
 
 export const addCourse = async (req, res, next) => {
   try {
-    const courseData = req.body;
+    const errors = validationResult(req);
 
-    const course = await Course.create(courseData, {
-      field: ["title", "price"],
-    });
+    if (!errors.isEmpty()) {
+      const err = new Error("Failed to add course!");
+      err.status = 400;
+      err.errors = errors.array();
+      throw err;
+    }
+
+    const courseData = matchedData(req);
+
+    const course = await Course.create(courseData);
 
     res.status(201).json({ message: "added course!", course });
   } catch (err) {

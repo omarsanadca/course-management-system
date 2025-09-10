@@ -1,34 +1,30 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { matchedData, validationResult } from "express-validator";
 
 import { User } from "../models/user.model.js";
 
-
 export const register = async (req, res, next) => {
   try {
-    const { name, email, role, password, confirmPassword } = req.body;
+    const { name, email, role, password } = req.body;
 
-    const findUser = await User.findOne({
-      where: {
-        email,
-      },
-    });
+    const errors = validationResult(req);
 
-    if (findUser) {
-      const err = new Error("This email is already used!");
+    if (!errors.isEmpty()) {
+      const err = new Error("Register failed!");
       err.status = 400;
-      throw err;
-    }
-
-    if (password !== confirmPassword) {
-      const err = new Error("Passwords don't match!");
-      err.status = 400;
+      err.errors = errors.array();
       throw err;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ name, email, role, password: hashedPassword });
+    const user = await User.create({
+      name,
+      email,
+      role,
+      password: hashedPassword,
+    });
 
     res.status(201).json({
       message: "User created!",
@@ -45,6 +41,15 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      const err = new Error("Login failed!");
+      err.status = 400;
+      err.errors = errors.array();
+      throw err;
+    }
 
     const user = await User.findOne({ where: { email } });
 
@@ -65,7 +70,7 @@ export const login = async (req, res, next) => {
     const payload = {
       userId: user.id,
       userEmail: user.email,
-      role: user.role
+      role: user.role,
     };
 
     jwt.sign(payload, "my-secret", { expiresIn: "24h" }, (err, token) => {
