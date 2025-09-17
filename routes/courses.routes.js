@@ -9,7 +9,11 @@ router.get("/", getAllCourses);
 
 router.get(
   "/:id",
-  [param("id").isNumeric().withMessage("course id must be numeric!")],
+  [
+    param("id")
+      .isLength({ min: 24, max: 24 })
+      .withMessage("course id must be 24 characters!"),
+  ],
   getCourse
 );
 

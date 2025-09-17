@@ -9,8 +9,6 @@ import {
   enrollCourse,
 } from "../controllers/users.controller.js";
 
-import isAdmin from "../middlewares/is-admin.js";
-
 const router = express.Router();
 
 router.get("/me", getUser);

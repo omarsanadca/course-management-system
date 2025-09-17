@@ -1,6 +1,7 @@
 import { body } from "express-validator";
 
-import { User } from "../models/user.model.js";
+// import { User } from "../models/user.model.js";
+import User from "../models/user.model.js";
 
 export const registerValidator = [
   body("email")
@@ -8,9 +9,7 @@ export const registerValidator = [
     .withMessage("Please enter a valid email")
     .custom(async (email) => {
       const findUser = await User.findOne({
-        where: {
-          email,
-        },
+        email,
       });
       if (findUser) {
         throw new Error("This email is already used! (express-validator)");

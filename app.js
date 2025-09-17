@@ -1,13 +1,11 @@
 import express from "express";
 import morgan from "morgan";
-
-/* db configuration */
-import sequelize from "./utils/db.js";
+import mongoose from "mongoose";
 
 /* model */
-import { Course } from "./models/course.model.js";
-import { Profile } from "./models/profile.model.js";
-import { User } from "./models/user.model.js";
+// import { Course } from "./models/course.model.js";
+// import { Profile } from "./models/profile.model.js";
+// import { User } from "./models/user.model.js";
 
 /* routes */
 import usersRoutes from "./routes/users.routes.js";
@@ -15,6 +13,7 @@ import coursesRoutes from "./routes/courses.routes.js";
 import profilesRoutes from "./routes/profile.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import lectureRoutes from "./routes/lecture.routes.js";
 
 /* middlewares */
 import isAuthenticated from "./middlewares/is-authenticated.js";
@@ -27,7 +26,7 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
-app.get("/", async (req, res) => {
+app.get("/", async (req, res, next) => {
   res.json({ message: "SERVER OK!", headers: req.headers });
 });
 
@@ -51,21 +50,28 @@ app.use("/api/courses/", coursesRoutes);
 app.use("/api/profiles/", isAuthenticated, profilesRoutes);
 app.use("/api/auth/", authRoutes);
 app.use("/api/admin/", isAuthenticated, isAdmin, adminRoutes);
+app.use(
+  "/api/admin/courses/",
+  isAuthenticated,
+  isAdmin,
+  lectureRoutes
+);
 
 app.use(errorMiddleware);
 
 /* Relationships */
-User.hasOne(Profile);
-Profile.belongsTo(User);
+// User.hasOne(Profile);
+// Profile.belongsTo(User);
 
-User.belongsToMany(Course, { through: "CourseEnrollment" });
-Course.belongsToMany(User, { through: "CourseEnrollment" });
+// User.belongsToMany(Course, { through: "CourseEnrollment" });
+// Course.belongsToMany(User, { through: "CourseEnrollment" });
 
 const PORT = 4000;
 
-sequelize
-  // .sync({ force: true })
-  .sync()
+mongoose
+  .connect(
+    "mongodb+srv://sanad:sanad1234@node-ca.vosqn34.mongodb.net/course_management_system?retryWrites=true&w=majority&appName=node-ca"
+  )
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Sever running on http://localhost:${PORT}`);

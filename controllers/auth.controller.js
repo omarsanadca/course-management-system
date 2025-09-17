@@ -2,7 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { matchedData, validationResult } from "express-validator";
 
-import { User } from "../models/user.model.js";
+// import { User } from "../models/user.model.js";
+import User from "../models/user.model.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -51,7 +52,7 @@ export const login = async (req, res, next) => {
       throw err;
     }
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ email });
 
     if (!user) {
       const err = new Error("Wrong credentials");

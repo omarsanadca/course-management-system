@@ -1,9 +1,11 @@
 import { matchedData, validationResult } from "express-validator";
-import { Course } from "../models/course.model.js";
+// import { Course } from "../models/course.model.js";
+
+import courseModel from "../models/course.model.js";
 
 export const getAllCourses = async (req, res, next) => {
   try {
-    const courses = await Course.findAll();
+    const courses = await courseModel.find();
     res.json({ message: "Get all courses", courses });
   } catch (err) {
     next(err);
@@ -21,7 +23,9 @@ export const getCourse = async (req, res, next) => {
       throw err;
     }
 
-    const course = await Course.findByPk(req.params.id);
+    const course = await courseModel
+      .findById(req.params.id)
+      .populate("lectures");
 
     if (!course) {
       const err = new Error("course not found!");
@@ -48,7 +52,7 @@ export const addCourse = async (req, res, next) => {
 
     const courseData = matchedData(req);
 
-    const course = await Course.create(courseData);
+    const course = await courseModel.create(courseData);
 
     res.status(201).json({ message: "added course!", course });
   } catch (err) {
@@ -60,7 +64,7 @@ export const updateCourse = async (req, res, next) => {
   try {
     const courseData = req.body;
 
-    const course = await Course.findByPk(req.params.id);
+    const course = await courseModel.findById(req.params.id);
 
     if (!course) {
       const err = new Error("course not found!");
@@ -68,7 +72,7 @@ export const updateCourse = async (req, res, next) => {
       throw err;
     }
 
-    await course.update(courseData, { fields: ["title", "price", "discount"] });
+    await course.updateOne(courseData);
 
     res.json({ message: "update course data" });
   } catch (err) {
@@ -78,14 +82,15 @@ export const updateCourse = async (req, res, next) => {
 
 export const deleteCourse = async (req, res, next) => {
   try {
-    const course = await Course.findByPk(req.params.id);
+    const course = await courseModel.findById(req.params.id);
 
     if (!course) {
       const err = new Error("course not found!");
       err.status = 404;
       throw err;
     }
-    await course.destroy();
+
+    await course.deleteOne();
 
     res.json({ message: "deleted course!" });
   } catch (err) {
